@@ -44,12 +44,11 @@ def get_all_teams_data(teams):
 		doc = get_team_doc(team)
 		if doc is None:
 			print(f"Could not get data for {team}")
-			break
 		else:
 			print(f"Got data for team {team}")
 			doc["team_name"] = team
-		add_match_scouting_data(team, doc)
-		all_teams_data.append(doc)
+			add_match_scouting_data(team, doc)
+			all_teams_data.append(doc)
 	return all_teams_data
 
 
@@ -69,7 +68,7 @@ def add_match_scouting_data(team, data):
 		total_matches+=1
 		has_already_climbed = False
 		match_data = match.to_dict()
-		#print(f"Parsing {match_data['matchType']}{match.id} for {team}")
+		print(f"Parsing {match_data['matchType']}{match.id} for {team}")
 		for action in match_data["actions"]:
 			action_type = action["actionType"]
 			if action_type == "SHOT_UPPER":
@@ -130,6 +129,6 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Analyze results from Match Scouting")
 	parser.add_argument("eventcode")
 	args = parser.parse_args()
-	teams = get_teams_in_event('2022casf')
+	teams = get_teams_in_event(args.eventcode)
 	all_teams_data =  get_all_teams_data(teams)
 	generate_csv(all_teams_data, args.eventcode + ".csv")
