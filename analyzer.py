@@ -43,9 +43,9 @@ def get_all_teams_data(teams):
 	for team in teams:
 		doc = get_team_doc(team)
 		if doc is None:
-			print(f"Could not get data for {team}")
+			print(f"Could not find scouting data for {team}")
 		else:
-			print(f"Got data for team {team}")
+			print(f"Got scouting data for team {team}")
 			doc["team_name"] = team
 			add_match_scouting_data(team, doc)
 			all_teams_data.append(doc)
@@ -103,12 +103,15 @@ def add_match_scouting_data(team, data):
 					total_climb_levels+=4
 		total_match_points+=match_points
 
-	data["total_matches"] = total_matches
-	data["avg_low_hub_shots"] = low_hub_shots / total_matches
-	data["avg_high_hub_shots"] = high_hub_shots / total_matches
-	data["average_points_scored"] = total_match_points / total_matches
-	data["average_pieces_scored"] = successful_shots / total_matches
-	data["average_climb_level"] = total_climb_levels / total_matches
+	if total_matches > 0:
+		data["total_matches"] = total_matches
+		data["avg_low_hub_shots"] = low_hub_shots / total_matches
+		data["avg_high_hub_shots"] = high_hub_shots / total_matches
+		data["average_points_scored"] = total_match_points / total_matches
+		data["average_pieces_scored"] = successful_shots / total_matches
+		data["average_climb_level"] = total_climb_levels / total_matches
+	else:
+		data["total_matches"] = 0
 	if total_shots == 0:
 		data["high_hub_ratio"] = 1
 		data["scouted_accuracy"] = 0
@@ -121,8 +124,11 @@ def generate_csv(all_teams_data, filename):
 		file.truncate(0)
 		file.write(CSV_HEADER + '\n')
 		for team_data in all_teams_data:
-			csv_line = f"{team_data['team_name']},{team_data['accuracy'].replace(',',';')},{team_data['autonBalls']},{team_data['autonRoutine'].replace(',',';')},{team_data['badFalcons']},{str(team_data['climbLocations']).replace(',', ' and ')},{team_data['drivebaseType']},{team_data['driverExperience'].replace(',',';')},{team_data['features'].replace(',',';')},{team_data['avg_low_hub_shots']},{team_data['avg_high_hub_shots']},{team_data['scouted_accuracy']},{team_data['average_climb_level']},{team_data['average_pieces_scored']},{team_data['high_hub_ratio']},{team_data['average_pieces_scored']},{team_data['total_matches']}\n"
-			file.write(csv_line)
+			try:
+				csv_line = f"{team_data['team_name']},{team_data['accuracy'].replace(',',';')},{team_data['autonBalls']},{team_data['autonRoutine'].replace(',',';')},{team_data['badFalcons']},{str(team_data['climbLocations']).replace(',', ' and ')},{team_data['drivebaseType']},{team_data['driverExperience'].replace(',',';')},{team_data['features'].replace(',',';')},{team_data['avg_low_hub_shots']},{team_data['avg_high_hub_shots']},{team_data['scouted_accuracy']},{team_data['average_climb_level']},{team_data['average_pieces_scored']},{team_data['high_hub_ratio']},{team_data['average_pieces_scored']},{team_data['total_matches']}\n"
+				file.write(csv_line)
+			except KeyError:
+				print(f"Invalid data for: {team_data['team_name']}")
 		file.close()
 
 if __name__ == "__main__":
